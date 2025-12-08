@@ -22,9 +22,9 @@ load_dotenv()
 
 DB_HOST = os.getenv('SUPABASE_HOST', 'aws-1-ap-south-1.pooler.supabase.com')
 DB_PORT = int(os.getenv('SUPABASE_PORT', '5432'))
-DB_NAME = os.getenv('SUPABASE_DB', 'postgres.bbxemgwtzlzqhcjecjon')
-DB_USER = os.getenv('SUPABASE_USER', 'postgres')
-DB_PASSWORD = os.getenv('SUPABASE_PASSWORD', 'postgres')
+DB_NAME = os.getenv('SUPABASE_DB', 'postgres')
+DB_USER = os.getenv('SUPABASE_USER', 'postgres.bbxemgwtzlzqhcjecjon')
+DB_PASSWORD = os.getenv('SUPABASE_PASSWORD', '')
 
 # Connection string for reference
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
@@ -53,9 +53,9 @@ def get_database_connection():
     Environment Variables Required:
     - SUPABASE_HOST: Database host
     - SUPABASE_PORT: Database port (usually 5432)
-    - SUPABASE_USER: Database user
+    - SUPABASE_USER: Database user (format: postgres.PROJECT_ID)
     - SUPABASE_PASSWORD: Database password
-    - SUPABASE_DB: Database name
+    - SUPABASE_DB: Database name (usually 'postgres')
     
     For Supabase, sslmode='require' is mandatory.
     """
@@ -66,6 +66,7 @@ def get_database_connection():
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
+            sslmode='require',
             connect_timeout=5
         )
         st.success("✅ Database connected successfully!")
