@@ -1,0 +1,140 @@
+# Supabase Configuration TOML
+# Configuration file for Supabase migration and deployment
+# Updated: December 8, 2025
+
+[project]
+name = "visualisasi-abd-8"
+description = "World Happiness Report Data Warehouse & Dashboard"
+version = "2.0.0"
+
+[database]
+# Supabase PostgreSQL Connection Settings
+host = "aws-1-ap-south-1.pooler.supabase.com"
+port = 5432
+database = "postgres"
+username = "postgres"
+ssl_mode = "require"
+ssl_root_cert = "true"
+
+# Connection Pool Settings
+pool_size = 10
+max_overflow = 20
+pool_timeout = 30
+pool_recycle = 3600
+
+# Connection Parameters
+connect_timeout = 5
+application_name = "visualisasi-abd-8"
+
+[supabase]
+# Supabase Project Configuration
+url = "${SUPABASE_URL}"
+api_key = "${SUPABASE_API_KEY}"
+region = "ap-south-1"
+provider = "aws"
+
+[credentials]
+# Environment Variables (from .env file)
+password = "${SUPABASE_PASSWORD}"
+hostname = "${SUPABASE_HOST}"
+port = "${SUPABASE_PORT}"
+database_name = "${SUPABASE_DB}"
+user = "${SUPABASE_USER}"
+
+[migration]
+# Schema and Migration Settings
+auto_apply = false
+schema_name = "public"
+migration_table = "schema_migrations"
+migrations_dir = "./migrations"
+
+[tables]
+# Core Tables
+[tables.country]
+description = "Dimension table for countries"
+primary_key = "country_id"
+
+[tables.region]
+description = "Dimension table for regions"
+primary_key = "region_id"
+
+[tables.happiness_report]
+description = "Fact table for happiness reports"
+primary_key = "report_id"
+
+[tables.economic_indicator]
+description = "Economic indicators per report"
+primary_key = "indicator_id"
+
+[tables.social_indicator]
+description = "Social indicators per report"
+primary_key = "indicator_id"
+
+[tables.perception_indicator]
+description = "Perception indicators per report"
+primary_key = "indicator_id"
+
+[backup]
+# Automated Backup Configuration
+enabled = true
+frequency = "daily"
+retention_days = 30
+backup_location = "supabase_backups"
+
+[security]
+# Security Settings
+require_ssl = true
+enforce_row_level_security = false
+enable_encryption = true
+audit_logging = true
+
+[performance]
+# Performance Optimization
+cache_enabled = true
+cache_ttl = 3600
+query_timeout = 30000
+enable_indexing = true
+
+[streamlit]
+# Streamlit Dashboard Configuration
+page_title = "World Happiness Report Dashboard"
+page_icon = "🌍"
+layout = "wide"
+initial_sidebar_state = "expanded"
+theme = "light"
+
+[streamlit.colors]
+primaryColor = "#1f77b4"
+backgroundColor = "#f8f9fa"
+secondaryBackgroundColor = "#e8eef2"
+textColor = "#262730"
+
+[logging]
+# Logging Configuration
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+file = "logs/app.log"
+max_file_size = 10485760  # 10MB
+backup_count = 5
+
+[features]
+# Feature Flags
+enable_export_csv = true
+enable_correlation_analysis = true
+enable_trend_analysis = true
+enable_region_comparison = true
+enable_debug_mode = false
+
+[development]
+# Development Settings
+debug_mode = false
+reload_on_change = true
+verbose_logging = false
+
+# Notes for Setup:
+# 1. Copy .env.example to .env
+# 2. Fill in your actual Supabase credentials in .env
+# 3. Never commit .env file to version control
+# 4. Ensure all migration files are in ./migrations directory
+# 5. Run migrations using: supabase db push
+# 6. Test connection using: python -m config_whr.validate_database_connection()
