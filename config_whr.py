@@ -24,7 +24,7 @@ DB_HOST = os.getenv('SUPABASE_HOST', 'aws-1-ap-south-1.pooler.supabase.com')
 DB_PORT = int(os.getenv('SUPABASE_PORT', '5432'))
 DB_NAME = os.getenv('SUPABASE_DB', 'postgres')
 DB_USER = os.getenv('SUPABASE_USER', 'postgres.bbxemgwtzlzqhcjecjon')
-DB_PASSWORD = os.getenv('SUPABASE_PASSWORD', '')
+DB_PASSWORD = os.getenv('SUPABASE_PASSWORD', 'postgres')
 
 # Connection string for reference
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
