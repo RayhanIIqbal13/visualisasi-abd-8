@@ -317,6 +317,38 @@ def get_correlation_data(year):
     """
     return execute_query(query, (year,))
 
+def get_regions():
+    """Retrieve all regions as list of tuples (region_id, region_name)."""
+    regions = get_all_regions()
+    return [(r['region_id'], r['region_name']) for r in regions]
+
+def get_happiness_count():
+    """Get total count of happiness records in database."""
+    query = """
+    SELECT COUNT(*) as count
+    FROM happiness_report
+    """
+    result = execute_query_single(query)
+    return result['count'] if result else 0
+
+def get_countries_count():
+    """Get total count of countries in database."""
+    query = """
+    SELECT COUNT(*) as count
+    FROM country
+    """
+    result = execute_query_single(query)
+    return result['count'] if result else 0
+
+def get_regions_count():
+    """Get total count of regions in database."""
+    query = """
+    SELECT COUNT(*) as count
+    FROM region
+    """
+    result = execute_query_single(query)
+    return result['count'] if result else 0
+
 # =====================================================
 # STYLING & THEME
 # =====================================================
