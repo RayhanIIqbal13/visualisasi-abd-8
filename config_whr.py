@@ -69,7 +69,6 @@ def get_database_connection():
             sslmode='require',
             connect_timeout=5
         )
-        st.success("✅ Database connected successfully!")
         return conn
     except psycopg2.Error as e:
         st.error(f"❌ Database connection failed: {str(e)}")
