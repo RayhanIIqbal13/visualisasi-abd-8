@@ -340,6 +340,10 @@ def get_countries_count():
     result = execute_query_single(query)
     return result['count'] if result else 0
 
+def get_country_count():
+    """Alias for get_countries_count() - Get total count of countries in database."""
+    return get_countries_count()
+
 def get_regions_count():
     """Get total count of regions in database."""
     query = """
