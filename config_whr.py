@@ -349,6 +349,84 @@ def get_regions_count():
     result = execute_query_single(query)
     return result['count'] if result else 0
 
+def get_global_happiness_statistics():
+    """Get global happiness statistics across all years."""
+    query = """
+    SELECT 
+        ROUND(AVG(happiness_score)::numeric, 3) as avg_happiness,
+        ROUND(MAX(happiness_score)::numeric, 3) as max_happiness,
+        ROUND(MIN(happiness_score)::numeric, 3) as min_happiness,
+        COUNT(DISTINCT country_id) as total_countries,
+        COUNT(*) as total_records
+    FROM happiness_report
+    """
+    result = execute_query_single(query)
+    if result:
+        return {
+            'avg_happiness': float(result['avg_happiness']) if result['avg_happiness'] else 0,
+            'max_happiness': float(result['max_happiness']) if result['max_happiness'] else 0,
+            'min_happiness': float(result['min_happiness']) if result['min_happiness'] else 0,
+            'total_countries': result['total_countries'] or 0,
+            'total_records': result['total_records'] or 0
+        }
+    return {
+        'avg_happiness': 0,
+        'max_happiness': 0,
+        'min_happiness': 0,
+        'total_countries': 0,
+        'total_records': 0
+    }
+
+def get_countries_with_happiness_count():
+    """Get count of countries that have happiness data."""
+    query = """
+    SELECT COUNT(DISTINCT country_id) as count
+    FROM happiness_report
+    """
+    result = execute_query_single(query)
+    return result['count'] if result else 0
+
+def get_region_with_countries_count():
+    """Get regions with count of countries in each region."""
+    query = """
+    SELECT 
+        r.region_id, 
+        r.region_name, 
+        COUNT(DISTINCT c.country_id) as country_count
+    FROM region r
+    LEFT JOIN country c ON r.region_id = c.region_id
+    GROUP BY r.region_id, r.region_name
+    ORDER BY country_count DESC
+    """
+    return execute_query(query)
+
+def get_countries():
+    """Get all countries with their region info."""
+    query = """
+    SELECT 
+        c.country_id, 
+        c.country_name, 
+        r.region_name
+    FROM country c
+    JOIN region r ON c.region_id = r.region_id
+    ORDER BY c.country_name
+    """
+    return execute_query(query)
+
+def get_countries_by_region(region_id):
+    """Get countries by specific region."""
+    query = """
+    SELECT 
+        c.country_id, 
+        c.country_name, 
+        r.region_name
+    FROM country c
+    JOIN region r ON c.region_id = r.region_id
+    WHERE c.region_id = %s
+    ORDER BY c.country_name
+    """
+    return execute_query(query, (region_id,))
+
 # =====================================================
 # STYLING & THEME
 # =====================================================
