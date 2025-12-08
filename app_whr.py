@@ -87,28 +87,6 @@ import numpy as np                 # Numerical computing
 from datetime import datetime      # Date/time utilities
 from config_whr import *           # Import semua functions dan variables dari config_whr.py
 
-# Fallback functions if config_whr functions fail to import
-def get_region_count():
-    """Fallback function untuk get_region_count"""
-    try:
-        return len(get_all_regions()) if 'get_all_regions' in dir() else 13
-    except:
-        return 13
-
-def get_country_count():
-    """Fallback function untuk get_country_count"""
-    try:
-        return len(get_all_countries()) if 'get_all_countries' in dir() else 175
-    except:
-        return 175
-
-def get_happiness_report_count():
-    """Fallback function untuk get_happiness_report_count"""
-    try:
-        return 1500  # Approximate count
-    except:
-        return 1500
-
 # Try import folium untuk peta interaktif
 try:
     import folium                  # Library untuk membuat peta interaktif
@@ -270,7 +248,7 @@ COUNTRY_NAME_MAPPING = {
     'Somaliland region': 'Somaliland',
     
     # Asia
-    'Taiwan': 'Taiwan',
+    'Taiwan Province of China': 'Taiwan',
     
     # Special cases - these countries are not in GeoJSON
     # (will remain as gray "Unknown" on the map):
@@ -377,205 +355,45 @@ def halaman_beranda():
     st.markdown("---")
     st.markdown("### 📊 Statistik Ringkas Database")
     
-    # Buat 4 kolom untuk menampilkan 4 metrik
+    # Ambil statistik global
+    stats = get_global_happiness_statistics()
+    total_countries = get_country_count()
+    countries_with_data = get_countries_with_happiness_count()
+    
+    # Buat 4 kolom untuk menampilkan 4 metrik utama
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        # Tampilkan total jumlah region
-        total_regions = get_region_count()
-        st.metric(label="🌐 Total Region", value=total_regions)
+        # Total negara di database
+        st.metric(
+            label="🌐 Total Countries",
+            value=total_countries,
+            help=f"Total negara dalam database: {total_countries}\nDengan data happiness: {countries_with_data}"
+        )
     
     with col2:
-        # Tampilkan total jumlah negara
-        total_countries = get_country_count()
-        st.metric(label="🗺️ Total Country", value=total_countries)
+        # Rata-rata happiness score
+        st.metric(
+            label="📊 Rata-rata Happiness Score",
+            value=f"{stats['avg_happiness']:.3f}",
+            help="Rata-rata dari semua negara semua tahun (2015-2024)"
+        )
     
     with col3:
-        # Tampilkan total happiness records
-        total_happiness = get_happiness_count()
-        st.metric(label="😊 Total Happiness Records", value=total_happiness)
+        # Skor tertinggi
+        st.metric(
+            label="⬆️ Skor Tertinggi",
+            value=f"{stats['max_happiness']:.3f}",
+            help="Skor happiness tertinggi di seluruh data"
+        )
     
     with col4:
-        # Tampilkan range tahun data
-        available_years = get_available_years()
-        if available_years:
-            min_year = min(available_years)
-            max_year = max(available_years)
-            st.metric(label="📅 Tahun Data", value=f"{min_year} - {max_year}")
-        else:
-            st.metric(label="📅 Tahun Data", value="N/A")
-    
-    st.markdown("---")
-    
-    # ============ JSON DATA DISPLAY ============
-    # DESKRIPSI: Bagian ini membaca file JSON dari folder Data/Json dan menampilkan summary data
-    # Berguna untuk: Verifikasi bahwa file JSON sudah terbaca dengan benar dari folder
-    # Fungsi: Show preview data, total records per tahun, dan sample record detail
-    
-    st.markdown("### 📁 Data JSON yang Terbaca")
-    
-    # ============ IMPORT REQUIRED LIBRARIES ============
-    # json: Library untuk parse JSON files
-    # os: Library untuk operating system operations (file/folder management)
-    # Path: Object-oriented wrapper untuk file path operations
-    import json
-    import os
-    from pathlib import Path
-    
-    # ============ TENTUKAN FOLDER PATH ============
-    # Path ke folder yang berisi JSON files
-    # Format: Raw string (r"...") untuk menghindari issue dengan backslash di Windows
-    json_folder = Path(r"d:\Kampus ITK\ABD\Tugas Besar - ABD 8 v2\Data\Json")
-    
-    # ============ CEK APAKAH FOLDER EXISTS ============
-    # json_folder.exists() return True jika folder ada, False jika tidak
-    if json_folder.exists():
-        # ============ KUMPULKAN SEMUA FILE JSON ============
-        # glob("*.json"): Cari semua file dengan extension .json di folder
-        # sorted(): Urutkan file names secara alfabetis (ascending)
-        # Hasil: List of Path objects, contoh [Path("world_happiness_2015.json"), ...]
-        json_files = sorted(json_folder.glob("*.json"))
-        
-        # ============ CEK APAKAH ADA FILE JSON ============
-        # Jika ada minimal 1 file JSON, lanjut ke pemrosesan
-        if json_files:
-            # Separator markdown untuk visual clarity
-            st.markdown("---")
-            
-            # ============ INITIALIZE STORAGE ============
-            # List untuk menyimpan statistik dan data dari setiap file JSON
-            # Setiap element: dict dengan keys 'year', 'records', 'data'
-            json_stats = []
-            
-            # ============ LOOP DAN BACA SETIAP FILE JSON ============
-            # Iterasi setiap file JSON yang ditemukan
-            for json_file in json_files:
-                try:
-                    # ============ BACA FILE JSON ============
-                    # open(): Buka file dalam mode read ('r')
-                    # encoding='utf-8': Gunakan UTF-8 encoding (support karakter spesial)
-                    # json.load(): Parse JSON dan convert ke Python object (list/dict)
-                    with open(json_file, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                    
-                    # ============ EXTRACT INFORMASI ============
-                    # json_file.stem: Ambil nama file tanpa extension
-                    #   Contoh: "world_happiness_2015.json" → "world_happiness_2015"
-                    # replace('world_happiness_', ''): Hapus prefix → tinggal tahun
-                    #   Contoh: "world_happiness_2015" → "2015"
-                    year = json_file.stem.replace('world_happiness_', '')
-                    
-                    # ============ HITUNG TOTAL RECORDS ============
-                    # len(data): Hitung jumlah element jika data adalah list
-                    # isinstance(data, list): Check apakah data adalah list (bukan dict)
-                    # Jika bukan list, set total_records = 0
-                    total_records = len(data) if isinstance(data, list) else 0
-                    
-                    # ============ SIMPAN KE json_stats ============
-                    # Simpan statistik file: year, total records, dan sample data
-                    # data[0]: Ambil element pertama sebagai sample record
-                    # Kondisional: jika list kosong, sample = None
-                    json_stats.append({
-                        'year': year,                                           # Tahun dari filename
-                        'records': total_records,                               # Total records dalam file
-                        'data': data[0] if isinstance(data, list) and len(data) > 0 else None  # Sample record
-                    })
-                
-                # ============ ERROR HANDLING ============
-                # Jika ada error saat membaca file (corrupted, invalid JSON, dll), tampilkan error
-                except Exception as e:
-                    st.error(f"❌ Error membaca {json_file.name}: {str(e)}")
-            
-            # ============ TAMPILKAN SUMMARY TABLE ============
-            # Kondisi: Jika ada minimal 1 file JSON yang berhasil dibaca
-            if json_stats:
-                # Separator untuk section baru
-                st.markdown("#### 📊 Ringkasan Data JSON")
-                
-                # ============ SIAPKAN DATA UNTUK SUMMARY TABLE ============
-                # Konversi json_stats list ke format yang cocok untuk DataFrame
-                # Setiap element menjadi row di tabel dengan kolom: Tahun, Total Records, Status
-                summary_data = [
-                    {
-                        "📅 Tahun": stat['year'],                                           # Tahun dari stat
-                        "📝 Total Records": stat['records'],                                 # Jumlah records
-                        "🔗 Status": "✅ Berhasil" if stat['data'] else "⚠️ Kosong"         # Status: exist atau kosong
-                    }
-                    for stat in json_stats  # Loop setiap stat di json_stats
-                ]
-                
-                # ============ CONVERT KE DATAFRAME DAN TAMPILKAN ============
-                # pd.DataFrame(): Convert list of dicts ke pandas DataFrame
-                # st.dataframe(): Tampilkan tabel interaktif di Streamlit
-                # use_container_width=True: Perlebar tabel untuk full width
-                # hide_index=True: Jangan tampilkan row index (1, 2, 3, dll)
-                summary_df = pd.DataFrame(summary_data)
-                st.dataframe(summary_df, use_container_width=True, hide_index=True)
-                
-                # ============ SEPARATOR DAN HEADER UNTUK DETAIL SECTION ============
-                st.markdown("---")
-                st.markdown("#### 📋 Detail Data JSON per Tahun")
-                
-                # ============ TAMPILKAN DETAIL DATA DALAM 2-COLUMN LAYOUT ============
-                # Loop dengan step=2 untuk membuat 2 kolom
-                # range(0, len(json_stats), 2) = [0, 2, 4, 6, ...]
-                # Contoh: jika ada 10 files, loop akan: 0, 2, 4, 6, 8
-                #         setiap iteration membuat 2 kolom dengan 2 data
-                for i in range(0, len(json_stats), 2):
-                    # ============ BUAT 2-COLUMN LAYOUT ============
-                    # st.columns(2): Buat 2 kolom dengan width sama
-                    col1, col2 = st.columns(2)
-                    
-                    # ============ KOLOM 1 ============
-                    # Tampilkan data untuk stat ke-i
-                    with col1:
-                        stat = json_stats[i]  # Ambil stat ke-i dari list
-                        
-                        # Gunakan st.container() untuk wrap content di kolom
-                        with st.container():
-                            # ============ HEADER ============
-                            # Tampilkan tahun dalam format bold markdown
-                            st.markdown(f"**📄 Tahun {stat['year']}**")
-                            
-                            # ============ METADATA ============
-                            # Tampilkan total records dengan format markdown
-                            st.markdown(f"- 📊 Total Records: **{stat['records']}**")
-                            
-                            # ============ EXPANDABLE SAMPLE DATA ============
-                            # Jika ada sample data (stat['data'] tidak None), tampilkan dalam expander
-                            if stat['data']:
-                                # st.expander(): Buat collapsible section
-                                # expanded=False: Default status = collapsed (tutup)
-                                with st.expander(f"👁️ Lihat Sample Data", expanded=False):
-                                    # Loop setiap key-value pair di record sample
-                                    for key, value in stat['data'].items():
-                                        # Tampilkan dalam format: **key**: value
-                                        st.write(f"- **{key}**: {value}")
-                            else:
-                                # Jika tidak ada data, tampilkan warning
-                                st.warning("Tidak ada data")
-                    
-                    # ============ KOLOM 2 ============
-                    # Kondisional: Hanya tampilkan jika ada data ke-(i+1)
-                    # Cegah IndexError jika jumlah data ganjil
-                    if i + 1 < len(json_stats):
-                        with col2:
-                            stat = json_stats[i + 1]
-                            with st.container():
-                                st.markdown(f"**📄 Tahun {stat['year']}**")
-                                st.markdown(f"- 📊 Total Records: **{stat['records']}**")
-                                
-                                if stat['data']:
-                                    with st.expander(f"👁️ Lihat Sample Data", expanded=False):
-                                        # Tampilkan data dalam format yang readable
-                                        for key, value in stat['data'].items():
-                                            st.write(f"- **{key}**: {value}")
-                                else:
-                                    st.warning("Tidak ada data")
-        else:
-            st.warning("⚠️ Tidak ada file JSON di folder Data/Json")
-    else:
-        st.warning(f"⚠️ Folder JSON tidak ditemukan di {json_folder}")
+        # Skor terendah
+        st.metric(
+            label="⬇️ Skor Terendah",
+            value=f"{stats['min_happiness']:.3f}",
+            help="Skor happiness terendah di seluruh data"
+        )
     
     st.markdown("---")
     st.info("💡 Gunakan menu di sidebar untuk navigasi ke halaman yang berbeda")
@@ -1288,7 +1106,7 @@ def halaman_happiness_report():
             st.markdown("""
             **📖 Penjelasan Bar Chart - Top 10 Tidak Bahagia:**
             - Menampilkan 10 negara dengan skor kebahagiaan terendah
-            - Warna lebih terang (merah) = skor kebahagiaan lebih rendah
+            - Warna lebih gelap (merah) = skor kebahagiaan lebih rendah
             - Negara di posisi ini biasanya: konflik, kemiskinan, ketidakstabilan
             - Perlu perhatian khusus untuk pembangunan & kesejahteraan masyarakat
             """)
