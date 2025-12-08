@@ -514,6 +514,135 @@ def export_to_csv(data, filename):
     return df.to_csv(index=False).encode('utf-8')
 
 # =====================================================
+# AGGREGATED DATA FUNCTIONS
+# =====================================================
+
+def get_happiness_report_all_aggregated():
+    """Get aggregated happiness report across all years (2015-2024) per country."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(AVG(hr.ranking)::numeric, 1) as ranking,
+        ROUND(AVG(hr.happiness_score)::numeric, 3) as happiness_score
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    GROUP BY c.country_id, c.country_name, r.region_id, r.region_name
+    ORDER BY happiness_score DESC
+    """
+    return execute_query(query)
+
+def get_economic_indicators_all_aggregated():
+    """Get aggregated economic indicators across all years per country."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(AVG(ei.gdp_per_capita)::numeric, 3) as gdp_per_capita,
+        ROUND(AVG(hr.happiness_score)::numeric, 3) as happiness_score
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN economic_indicator ei ON hr.report_id = ei.report_id
+    WHERE ei.gdp_per_capita IS NOT NULL
+    GROUP BY c.country_id, c.country_name, r.region_id, r.region_name
+    ORDER BY gdp_per_capita DESC
+    """
+    return execute_query(query)
+
+def get_social_indicators_all_aggregated():
+    """Get aggregated social indicators across all years per country."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(AVG(si.social_support)::numeric, 3) as social_support,
+        ROUND(AVG(si.healthy_life_expectancy)::numeric, 3) as healthy_life_expectancy,
+        ROUND(AVG(si.freedom_to_make_life_choices)::numeric, 3) as freedom_to_make_life_choices,
+        ROUND(AVG(hr.happiness_score)::numeric, 3) as happiness_score
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN social_indicator si ON hr.report_id = si.report_id
+    GROUP BY c.country_id, c.country_name, r.region_id, r.region_name
+    ORDER BY happiness_score DESC
+    """
+    return execute_query(query)
+
+def get_perception_indicators_all_aggregated():
+    """Get aggregated perception indicators across all years per country."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(AVG(pi.generosity)::numeric, 3) as generosity,
+        ROUND(AVG(pi.perceptions_of_corruption)::numeric, 3) as perceptions_of_corruption,
+        ROUND(AVG(hr.happiness_score)::numeric, 3) as happiness_score
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN perception_indicator pi ON hr.report_id = pi.report_id
+    GROUP BY c.country_id, c.country_name, r.region_id, r.region_name
+    ORDER BY happiness_score DESC
+    """
+    return execute_query(query)
+
+def get_economic_indicators_by_year(year):
+    """Get economic indicators for a specific year."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(hr.happiness_score::numeric, 3) as happiness_score,
+        ROUND(ei.gdp_per_capita::numeric, 3) as gdp_per_capita
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN economic_indicator ei ON hr.report_id = ei.report_id
+    WHERE hr.year = %s AND ei.gdp_per_capita IS NOT NULL
+    ORDER BY ei.gdp_per_capita DESC
+    """
+    return execute_query(query, (year,))
+
+def get_social_indicators_by_year(year):
+    """Get social indicators for a specific year."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(hr.happiness_score::numeric, 3) as happiness_score,
+        ROUND(si.social_support::numeric, 3) as social_support,
+        ROUND(si.healthy_life_expectancy::numeric, 3) as healthy_life_expectancy,
+        ROUND(si.freedom_to_make_life_choices::numeric, 3) as freedom_to_make_life_choices
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN social_indicator si ON hr.report_id = si.report_id
+    WHERE hr.year = %s
+    ORDER BY hr.happiness_score DESC
+    """
+    return execute_query(query, (year,))
+
+def get_perception_indicators_by_year(year):
+    """Get perception indicators for a specific year."""
+    query = """
+    SELECT 
+        c.country_name,
+        r.region_name,
+        ROUND(hr.happiness_score::numeric, 3) as happiness_score,
+        ROUND(pi.generosity::numeric, 3) as generosity,
+        ROUND(pi.perceptions_of_corruption::numeric, 3) as perceptions_of_corruption
+    FROM happiness_report hr
+    JOIN country c ON hr.country_id = c.country_id
+    JOIN region r ON c.region_id = r.region_id
+    LEFT JOIN perception_indicator pi ON hr.report_id = pi.report_id
+    WHERE hr.year = %s
+    ORDER BY hr.happiness_score DESC
+    """
+    return execute_query(query, (year,))
+
+# =====================================================
 # DEBUG UTILITIES
 # =====================================================
 
