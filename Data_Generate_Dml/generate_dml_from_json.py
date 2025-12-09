@@ -95,9 +95,13 @@ import os
 from pathlib import Path
 from collections import OrderedDict
 
-# Path ke folder JSON bersih
-JSON_DIR = Path("Data/Json_Bersih")
-OUTPUT_FILE = "DML_whr_v2_generated.sql"
+# Get script directory untuk relative path
+SCRIPT_DIR = Path(__file__).parent.resolve()
+PROJECT_ROOT = SCRIPT_DIR.parent
+
+# Path ke folder JSON bersih (relative to project root)
+JSON_DIR = PROJECT_ROOT / "Data" / "Json_Bersih"
+OUTPUT_FILE = PROJECT_ROOT / "DML_whr_v2_generated.sql"
 
 # Region mapping
 REGIONS = {
@@ -176,8 +180,13 @@ def escape_string(s):
         return ''
     return str(s).replace("'", "''")
 
-def generate_dml(all_data):
-    """Generate complete DML SQL file"""
+def generate_dml(all_data, fill_missing=True):
+    """Generate complete DML SQL file
+    
+    Args:
+        all_data: Dictionary dengan year sebagai key
+        fill_missing: Jika True, generate data dengan nilai 0 untuk negara yang hilang
+    """
     
     # Extract countries
     countries = extract_countries(all_data)
@@ -193,13 +202,18 @@ def generate_dml(all_data):
     
     # Sort countries by ID
     sorted_country_ids = sorted(countries.keys())
+    sorted_years = sorted(all_data.keys())
     
-    # For each country, generate 10 years of data
+    # Track statistics
+    existing_data_count = 0
+    missing_data_count = 0
+    
+    # For each country, generate ALL years of data
     for country_id in sorted_country_ids:
         country_info = countries[country_id]
         country_name = country_info['country_name']
         
-        for year in sorted(all_data.keys()):
+        for year in sorted_years:
             entries = all_data[year]
             
             # Find entry for this country in this year
@@ -209,10 +223,12 @@ def generate_dml(all_data):
                     entry = e
                     break
             
+            # ALWAYS generate record (with 0 values if missing)
             if entry:
+                existing_data_count += 1
                 report_id = record_counter
                 
-                # Happiness Report
+                # Happiness Report - DATA EXISTS
                 happiness_records.append({
                     'report_id': report_id,
                     'country_id': country_id,
@@ -247,6 +263,52 @@ def generate_dml(all_data):
                 })
                 
                 record_counter += 1
+                
+            elif fill_missing:
+                # DATA MISSING - Generate with 0 values
+                missing_data_count += 1
+                report_id = record_counter
+                
+                # Happiness Report - MISSING DATA (all zeros)
+                happiness_records.append({
+                    'report_id': report_id,
+                    'country_id': country_id,
+                    'year': year,
+                    'ranking': 0,
+                    'happiness_score': 0.0,
+                    'dystopia_residual': 0.0
+                })
+                
+                # Economic Indicator
+                economic_records.append({
+                    'economic_id': report_id,
+                    'report_id': report_id,
+                    'gdp_per_capita': 0.0
+                })
+                
+                # Social Indicator
+                social_records.append({
+                    'social_id': report_id + 10000,
+                    'report_id': report_id,
+                    'social_support': 0.0,
+                    'healthy_life_expectancy': 0.0,
+                    'freedom_to_make_life_choices': 0.0
+                })
+                
+                # Perception Indicator
+                perception_records.append({
+                    'perception_id': report_id + 20000,
+                    'report_id': report_id,
+                    'generosity': 0.0,
+                    'perceptions_of_corruption': 0.0
+                })
+                
+                record_counter += 1
+    
+    print(f"\n📊 Data Statistics:")
+    print(f"   Existing data: {existing_data_count} records")
+    print(f"   Missing data (filled with 0): {missing_data_count} records")
+    print(f"   Total records: {existing_data_count + missing_data_count} records")
     
     # Generate SQL output
     sql_lines = []
