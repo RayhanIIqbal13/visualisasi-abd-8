@@ -1,6 +1,11 @@
 import json
+from pathlib import Path
 
-with open('Data/Json/world_happiness_2024.json') as f:
+SCRIPT_DIR = Path(__file__).parent.resolve()
+PROJECT_ROOT = SCRIPT_DIR.parent
+json_file = PROJECT_ROOT / "Data" / "Json_Bersih" / "world_happiness_2024.json"
+
+with open(json_file) as f:
     data = json.load(f)
     if len(data) > 0:
         entry = data[0]

@@ -1,7 +1,11 @@
 import json
 import os
+from pathlib import Path
 
-json_folder = r"d:\Kampus ITK\ABD\Tugas Besar - ABD 8 v2\Data\Json"
+# Path relative to script location
+SCRIPT_DIR = Path(__file__).parent.resolve()
+PROJECT_ROOT = SCRIPT_DIR.parent
+json_folder = PROJECT_ROOT / "Data" / "Json_Bersih"
 
 # Region mapping
 REGION_MAP = {

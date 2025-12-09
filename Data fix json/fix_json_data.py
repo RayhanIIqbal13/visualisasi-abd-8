@@ -78,7 +78,9 @@ def fix_json_file(filepath):
 
 def main():
     """Process semua JSON files"""
-    json_dir = Path('Data/Json')
+    SCRIPT_DIR = Path(__file__).parent.resolve()
+    PROJECT_ROOT = SCRIPT_DIR.parent
+    json_dir = PROJECT_ROOT / "Data" / "Json_Bersih"
     
     if not json_dir.exists():
         print(f"❌ Directory tidak ditemukan: {json_dir}")
