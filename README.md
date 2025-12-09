@@ -35,8 +35,8 @@ Project ini menyediakan **dashboard Streamlit interaktif 8 halaman** untuk menga
 - ✅ Peta interaktif dengan Folium
 - ✅ Schema database ternormalisasi (3NF)
 - ✅ Kredensial aman berbasis environment variable
-- ✅ 170 negara dari 10 region dunia
-- ✅ 1.530 records data kebahagiaan (2015-2024)
+- ✅ 171 negara dari 10 region dunia
+- ✅ 1.710 records data kebahagiaan (2015-2024)
 
 ---
 
@@ -836,7 +836,7 @@ Indicator   Indicator   Indicator
 
 ### Overview DML
 
-`DML_whr_v2_generated.sql` menyimpan data untuk 170 negara dengan 1.530 records kebahagiaan (9 tahun × 170 negara).
+`DML_whr_v2.sql` menyimpan data untuk 171 negara dengan 1.710 records kebahagiaan (10 tahun × 171 negara).
 
 ### Block 1: INSERT REGIONS
 
@@ -869,14 +869,19 @@ INSERT INTO country (country_id, country_name, region_id) VALUES
 (170, 'South Sudan', 3);
 ```
 
-**Data:** 170 negara dari berbagai region
+**Data:** 171 negara dari berbagai region
 
 **Distribusi:**
-- Western Europe: 25 negara
-- Sub-Saharan Africa: 40 negara
-- Latin America: 22 negara
-- Asia: 35 negara
-- Others: 48 negara
+- Western Europe: 21 negara
+- Sub-Saharan Africa: 41 negara
+- Latin America and Caribbean: 23 negara
+- Central and Eastern Europe: 17 negara
+- Middle East and North Africa: 18 negara
+- Commonwealth of Independent States: 12 negara
+- Southeast Asia: 9 negara
+- South Asia: 7 negara
+- East Asia: 6 negara
+- North America and ANZ: 4 negara
 
 ---
 
@@ -890,8 +895,8 @@ INSERT INTO happiness_report (report_id, country_id, year, ranking, happiness_sc
 ```
 
 **Data Characteristics:**
-- 1.530 records total (170 negara × 9 tahun)
-- Tahun: 2015, 2017-2024
+- 1.710 records total (171 negara × 10 tahun)
+- Tahun: 2015-2024 (lengkap)
 - Happiness score range: 2.5 - 7.8
 - Missing data diisi dengan nilai 0
 
@@ -1157,9 +1162,9 @@ docker run -p 8501:8501 whr-dashboard
 
 | Aspek | Detail |
 |-------|--------|
-| **Database** | 6 tabel ternormalisasi, 170 negara, 1.530 records happiness |
+| **Database** | 6 tabel ternormalisasi, 171 negara, 1.710 records happiness |
 | **Schema** | 3NF dengan star schema design |
-| **Data Volume** | 10 region, 170 negara, 9 tahun data (2015-2024) |
+| **Data Volume** | 10 region, 171 negara, 10 tahun data (2015-2024) |
 | **Visualisasi** | 15+ chart interaktif (Bar, Scatter, Pie, Choropleth, dll) |
 | **Halaman** | 8 halaman analisis dengan fokus berbeda |
 | **Query Count** | 15+ optimized SQL queries dengan proper indexing |
