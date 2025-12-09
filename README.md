@@ -11,7 +11,7 @@
 5. [Konfigurasi Database (config_whr.py)](#-konfigurasi-database-config_whrpy)
 6. [Fitur Dashboard (app_whr.py)](#-fitur-dashboard-app_whrpy)
 7. [Schema Database (DDL_whr_v2.sql)](#-schema-database-ddl_whr_v2sql)
-8. [Data Sample (DML_whr_v2.sql)](#-data-sample-dml_whr_v2sql)
+8. [Data Sample (DML_whr_v2_generated.sql)](#-data-sample-dml_whr_v2_generatedsql)
 9. [Halaman Dashboard](#-halaman-dashboard)
 10. [Panduan Penggunaan](#-panduan-penggunaan)
 11. [Troubleshooting](#-troubleshooting)
@@ -147,7 +147,7 @@ SUPABASE_API_KEY=your_api_key
 psql -h your_host -U postgres.your_project_id -d postgres -f DDL_whr_v2.sql
 
 # Load data
-psql -h your_host -U postgres.your_project_id -d postgres -f DML_whr_v2.sql
+psql -h your_host -U postgres.your_project_id -d postgres -f DML_whr_v2_generated.sql
 ```
 
 ### Langkah 6: Jalankan Dashboard
@@ -832,7 +832,7 @@ Indicator   Indicator   Indicator
 
 ---
 
-## 📥 Data Sample (DML_whr_v2.sql)
+## 📥 Data Sample (DML_whr_v2_generated.sql)
 
 ### Overview DML
 
@@ -1043,7 +1043,7 @@ df['score'].mean()  # Tanpa type conversion
 psql -h your_host -U your_user -d postgres -f DDL_whr_v2.sql
 
 # 2. Load data
-psql -h your_host -U your_user -d postgres -f DML_whr_v2.sql
+psql -h your_host -U your_user -d postgres -f DML_whr_v2_generated.sql
 
 # 3. Verifikasi tabel
 psql -h your_host -U your_user -d postgres \
